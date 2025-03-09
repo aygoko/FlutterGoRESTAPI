@@ -8,9 +8,9 @@ type User struct {
 	data map[string]string
 }
 
-func NewUser(repo repository.User) *User {
+func NewUser() *User {
 	return &User{
-		repo: repo,
+		data: make(map[string]string),
 	}
 }
 

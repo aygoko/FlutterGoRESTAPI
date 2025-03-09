@@ -1,30 +1,40 @@
 package service
 
 import (
+	"bcrypt"
 	"errors"
+	"repository"
 
 	"github.com/google/uuid"
 )
 
 type User struct {
-	ID    string `json:"id"`
-	Login string `json:"login"`
-	Email string `json:"email"`
+	ID       string `json:"id"`
+	Login    string `json:"login"`
+	Email    string `json:"email"`
+	Password string `json:"-"`
 }
 
 type UserService struct {
+	repo   repository.User
 	users  map[string]*User
 	emails map[string]string
 }
 
-func NewUserService() *UserService {
+func NewUserService(repo repository.User) *UserService {
 	return &UserService{
+		repo:   repo,
 		users:  make(map[string]*User),
 		emails: make(map[string]string),
 	}
 }
 
 func (s *UserService) CreateUser(login, email, password string) (*User, error) {
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
 
 	if login == "" || email == "" {
 		return nil, errors.New("login and email are required")
@@ -39,9 +49,10 @@ func (s *UserService) CreateUser(login, email, password string) (*User, error) {
 	}
 
 	user := &User{
-		ID:    generateUserID(),
-		Login: login,
-		Email: email,
+		ID:       generateUserID(),
+		Login:    login,
+		Email:    email,
+		Password: string(hashedPassword),
 	}
 
 	s.users[login] = user
@@ -64,6 +75,26 @@ func (s *UserService) GetUserByEmail(email string) (*User, error) {
 		return nil, errors.New("user not found")
 	}
 	return s.users[login], nil
+}
+
+func (s *UserService) GetAllUsers() []*User {
+	var users []*User
+	for _, user := range s.users {
+		users = append(users, user)
+	}
+	return users
+}
+
+func (s *UserService) DeleteUser(login string) error {
+	user, exists := s.users[login]
+	if !exists {
+		return errors.New("user not found")
+	}
+
+	delete(s.users, login)
+	delete(s.emails, user.Email)
+
+	return nil
 }
 
 func generateUserID() string {

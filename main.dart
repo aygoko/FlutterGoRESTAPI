@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'user_model.dart';
+import 'user_form_screen.dart'; 
 
 void main() => runApp(MyApp());
 
@@ -9,6 +10,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'User Management',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
       home: UserListScreen(),
     );
   }
@@ -24,7 +29,13 @@ class _UserListScreenState extends State<UserListScreen> {
   bool isLoading = false;
   bool isError = false;
 
-  Future<void> fetchUsers() async {
+  @override
+  void initState() {
+    super.initState();
+    _fetchUsers();
+  }
+
+  Future<void> _fetchUsers() async {
     setState(() {
       isLoading = true;
       isError = false;
@@ -32,7 +43,7 @@ class _UserListScreenState extends State<UserListScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8080/api/users'), 
+        Uri.parse('http://10.0.2.2:8080/api/users'),
       );
 
       if (response.statusCode == 200) {
@@ -57,50 +68,69 @@ class _UserListScreenState extends State<UserListScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    fetchUsers();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Список пользователей'),
-      ),
-      body: Column(
-        children: [
-          if (isLoading)
-            Center(child: CircularProgressIndicator())
-          else if (isError)
-            Center(child: Text('Ошибка загрузки данных'))
-          else if (users.isEmpty)
-            Center(child: Text('Нет данных'))
-          else
-            Expanded(
-              child: ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  final user = users[index];
-                  return Card(
-                    child: ListTile(
-                      title: Text(user.name),
-                      subtitle: Text(user.email),
-                      trailing: Text(user.id),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ElevatedButton(
-            onPressed: fetchUsers,
-            child: Text('Обновить'),
-            style: ElevatedButton.styleFrom(
-              primary: Colors.blue,
-              padding: EdgeInsets.symmetric(vertical: 16),
-            ),
-          ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: _fetchUsers,
+          )
         ],
+      ),
+      body: _buildContent(),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => UserFormScreen()),
+          );
+          if (result != null && result['refresh'] == true) {
+            _fetchUsers();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+    if (isError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Ошибка загрузки данных'),
+            SizedBox(height: 16),
+            ElevatedButton(
+              child: Text('Повторить'),
+              onPressed: _fetchUsers,
+            ),
+          ],
+        ),
+      );
+    }
+    if (users.isEmpty) {
+      return Center(child: Text('Нет данных'));
+    }
+    return Expanded(
+      child: ListView.builder(
+        itemCount: users.length,
+        itemBuilder: (context, index) {
+          final user = users[index];
+          return Card(
+            margin: EdgeInsets.all(8),
+            child: ListTile(
+              title: Text(user.login), 
+              subtitle: Text(user.email),
+              trailing: Text(user.id),
+            ),
+          );
+        },
       ),
     );
   }
