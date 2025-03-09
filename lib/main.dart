@@ -3,8 +3,20 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'user_model.dart';
 import 'user_form_screen.dart'; 
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  KeyboardVisibilityController().onChange.listen((visible) {
+    if (visible) {
+      print('Keyboard opened');
+    } else {
+      print('Keyboard closed');
+    }
+  });
+
+  
+  runApp(MyApp()); 
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -18,6 +30,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 
 class UserListScreen extends StatefulWidget {
   @override

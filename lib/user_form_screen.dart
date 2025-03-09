@@ -8,12 +8,20 @@ class UserFormScreen extends StatefulWidget {
 }
 
 class _UserFormScreenState extends State<UserFormScreen> {
+
+  final _focusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
   final _loginController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _hasError = false;
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
@@ -73,20 +81,10 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   }
                   return null;
                 },
+                textInputAction: TextInputAction.next,
+                onEditingComplete: () => _focusNode.requestFocus(),
               ),
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Email is required';
-                  }
-                  if (!value.contains('@')) {
-                    return 'Invalid email format';
-                  }
-                  return null;
-                },
-              ),
+              
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(labelText: 'Password'),
@@ -100,6 +98,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   }
                   return null;
                 },
+                focusNode: _focusNode,
+                onTap: () => _focusNode.requestFocus(), 
               ),
               SizedBox(height: 20),
               _isLoading
