@@ -1,39 +1,44 @@
-package repository
+package ram_storage
 
 import (
 	"errors"
 
-	"github.com/aygoko/FlutterGoRESTAPI/repository"
+	repository "github.com/aygoko/FlutterGoRESTAPI/domain" // Import domain package
 )
 
-type User struct {
-	data map[string]*repository.UserService
+// UserRepositoryRAM implements the UserService interface
+type UserRepositoryRAM struct {
+	data map[string]*repository.User // Use domain.User
 }
 
-func NewUser() *repository.UserService {
-	return &repository.UserService{
-		data: make(map[string]*repository.UserService),
+// NewUserRepository creates a new RAM-based user repository
+func NewUserRepository() repository.UserService { // Returns the domain interface
+	return &UserRepositoryRAM{
+		data: make(map[string]*repository.User),
 	}
 }
 
-func (rs *User) Save(user *User) error {
-	if _, exists := rs.data[user.Login]; exists {
+// Save stores a user
+func (r *UserRepositoryRAM) Save(user *repository.User) error {
+	if _, exists := r.data[user.Login]; exists {
 		return errors.New("user already exists")
 	}
-	rs.data[user.Login] = user
+	r.data[user.Login] = user
 	return nil
 }
 
-func (rs *User) Get(login string) (*User, error) {
-	user, exists := rs.data[login]
+// Get retrieves a user by login
+func (r *UserRepositoryRAM) Get(login string) (*repository.User, error) {
+	user, exists := r.data[login]
 	if !exists {
 		return nil, errors.New("user not found")
 	}
 	return user, nil
 }
 
-func (rs *User) GetByEmail(email string) (*User, error) {
-	for _, user := range rs.data {
+// GetByEmail searches for a user by email
+func (r *UserRepositoryRAM) GetByEmail(email string) (*repository.User, error) {
+	for _, user := range r.data {
 		if user.Email == email {
 			return user, nil
 		}
@@ -42,19 +47,19 @@ func (rs *User) GetByEmail(email string) (*User, error) {
 }
 
 // List returns all users
-func (rs *User) List() ([]*User, error) {
-	users := make([]*User, 0, len(rs.data))
-	for _, user := range rs.data {
+func (r *UserRepositoryRAM) List() ([]*repository.User, error) {
+	users := make([]*repository.User, 0, len(r.data))
+	for _, user := range r.data {
 		users = append(users, user)
 	}
 	return users, nil
 }
 
 // Delete removes a user by login
-func (rs *User) Delete(login string) error {
-	if _, exists := rs.data[login]; !exists {
+func (r *UserRepositoryRAM) Delete(login string) error {
+	if _, exists := r.data[login]; !exists {
 		return errors.New("user not found")
 	}
-	delete(rs.data, login)
+	delete(r.data, login)
 	return nil
 }

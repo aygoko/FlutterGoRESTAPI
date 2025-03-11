@@ -3,7 +3,7 @@ package types
 import (
 	"errors"
 
-	"github.com/aygoko/FlutterGoRESTAPI/domain"
+	"github.com/aygoko/FlutterGoRESTAPI/repository"
 	"github.com/aygoko/FlutterGoRESTAPI/usecases/service"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -18,7 +18,7 @@ import (
 // @Success 201 {object} types.User
 // @Failure 400 {string} error "Invalid request or duplicate user"
 // @Router /api/users [post]
-func (s *service.UserService) CreateUser(login, email, password string) (*domain.User, error) { // Use types.User here
+func (s *repository.UserService) CreateUser(login, email, password string) (*repository.User, error) { // Use types.User here
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -37,14 +37,14 @@ func (s *service.UserService) CreateUser(login, email, password string) (*domain
 		return nil, errors.New("email already in use by " + existingLogin)
 	}
 
-	user := &User{ // Create instance of types.User
+	user := &repository.User{ // Create instance of types.User
 		ID:       service.GenerateUserID(),
 		Login:    login,
 		Email:    email,
 		Password: string(hashedPassword),
 	}
 
-	s.Users[login] = user // Ensure service.UserService has Users map
+	s.Users[login] = user
 	s.Emails[email] = login
 
 	return user, nil
@@ -57,7 +57,7 @@ func (s *service.UserService) CreateUser(login, email, password string) (*domain
 // @Success 200 {object} types.User
 // @Failure 404 {string} error "User not found"
 // @Router /api/users/{login} [get]
-func (s *service.UserService) GetUserByLogin(login string) (*domain.User, error) { // Return types.User
+func (s *repository.UserService) GetUserByLogin(login string) (*repository.User, error) { // Return types.User
 	user, exists := s.Users[login] // Access exported Users map
 	if !exists {
 		return nil, errors.New("user not found")
@@ -72,7 +72,7 @@ func (s *service.UserService) GetUserByLogin(login string) (*domain.User, error)
 // @Success 200 {object} types.User
 // @Failure 404 {string} error "User not found"
 // @Router /api/users/email/{email} [get]
-func (s *service.UserService) GetUserByEmail(email string) (*User, error) {
+func (s *repository.UserService) GetUserByEmail(email string) (*repository.User, error) {
 	login, exists := s.Emails[email] // Use exported Emails map
 	if !exists {
 		return nil, errors.New("user not found")
@@ -89,8 +89,8 @@ func (s *service.UserService) GetUserByEmail(email string) (*User, error) {
 // @Tags Users
 // @Success 200 {array} types.User
 // @Router /api/users [get]
-func (s *service.UserService) GetAllUsers() []*User {
-	users := make([]*User, 0, len(s.Users))
+func (s *repository.UserService) GetAllUsers() []*repository.User {
+	users := make([]*repository.User, 0, len(s.Users))
 	for _, user := range s.Users {
 		users = append(users, user)
 	}
@@ -104,14 +104,14 @@ func (s *service.UserService) GetAllUsers() []*User {
 // @Success 204 "User deleted successfully"
 // @Failure 404 {string} error "User not found"
 // @Router /api/users/{login} [delete]
-func (s *service.UserService) DeleteUser(login string) error {
+func (s *repository.UserService) DeleteUser(login string) error {
 	user, exists := s.Users[login]
 	if !exists {
 		return errors.New("user not found")
 	}
 
 	delete(s.Users, login)
-	delete(s.Emails, user.Email) // Ensure user.Email is accessible
+	delete(s.Emails, user.Email)
 
 	return nil
 }

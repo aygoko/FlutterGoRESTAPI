@@ -2,26 +2,41 @@ package service
 
 import (
 	repository "github.com/aygoko/FlutterGoRESTAPI/repository/ram_storage"
-	"github.com/google/uuid"
 )
 
-type User struct {
-	ID       string `json:"id"`
-	Login    string `json:"login"`
-	Email    string `json:"email"`
-	Password string `json:"-"`
-}
-
+// UserService holds the repository instance
 type UserService struct {
 	Repo repository.UserService
 }
 
-func NewUserService(repo repository.User) *UserService {
+// NewUserService creates a new service instance
+func NewUserService(repo repository.UserService) *UserService {
 	return &UserService{
 		Repo: repo,
 	}
 }
 
-func GenerateUserID() string {
-	return uuid.New().String()
+// Save delegates to repository
+func (s *UserService) Save(user *repository.User) error {
+	return s.Repo.Save(user)
+}
+
+// Get delegates to repository
+func (s *UserService) Get(login string) (*repository.User, error) {
+	return s.Repo.Get(login)
+}
+
+// GetByEmail delegates to repository
+func (s *UserService) GetByEmail(email string) (*repository.User, error) {
+	return s.Repo.GetByEmail(email)
+}
+
+// List delegates to repository
+func (s *UserService) List() ([]*repository.User, error) {
+	return s.Repo.List()
+}
+
+// Delete delegates to repository
+func (s *UserService) Delete(login string) error {
+	return s.Repo.Delete(login)
 }

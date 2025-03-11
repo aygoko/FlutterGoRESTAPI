@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	repository "github.com/aygoko/FlutterGoRESTAPI/domain"
 	"github.com/aygoko/FlutterGoRESTAPI/usecases/service"
-
 	"github.com/go-chi/chi/v5"
 )
 
@@ -27,18 +27,18 @@ func (h *UserHandler) WithObjectHandlers(r *chi.Mux) {
 }
 
 func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	users := h.service.GetAllUsers()
+	users := h.types.GetAllUsers()
 	json.NewEncoder(w).Encode(users)
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user service.User
+	var user repository.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	createdUser, err := h.service.CreateUser(user.Login, user.Email, user.Password)
+	createdUser, err := h.types.CreateUser(user.Login, user.Email, user.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -50,7 +50,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) GetUserByLogin(w http.ResponseWriter, r *http.Request) {
 	login := chi.URLParam(r, "login")
-	user, err := h.service.GetUserByLogin(login)
+	user, err := h.types.GetUserByLogin(login)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -60,7 +60,7 @@ func (h *UserHandler) GetUserByLogin(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	login := chi.URLParam(r, "login")
-	err := h.service.DeleteUser(login)
+	err := h.types.DeleteUser(login)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
