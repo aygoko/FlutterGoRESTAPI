@@ -1,7 +1,7 @@
 package repository
 
 type UserService interface {
-	Save(user *User) error
+	Save(user *User) (*User, error)
 	Get(login string) (*User, error)
 	GetByEmail(email string) (*User, error)
 	List() ([]*User, error)

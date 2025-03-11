@@ -6,25 +6,24 @@ import (
 	repository "github.com/aygoko/FlutterGoRESTAPI/domain" // Import domain package
 )
 
-// UserRepositoryRAM implements the UserService interface
-type UserRepositoryRAM struct {
-	data map[string]*repository.User // Use domain.User
-}
-
-// NewUserRepository creates a new RAM-based user repository
-func NewUserRepository() repository.UserService { // Returns the domain interface
+func NewUserRepository() repository.UserService { // Returns the interface
 	return &UserRepositoryRAM{
 		data: make(map[string]*repository.User),
 	}
 }
 
+// UserRepositoryRAM implements the UserService interface
+type UserRepositoryRAM struct {
+	data map[string]*repository.User // Use domain.User
+}
+
 // Save stores a user
-func (r *UserRepositoryRAM) Save(user *repository.User) error {
+func (r *UserRepositoryRAM) Save(user *repository.User) (*repository.User, error) {
 	if _, exists := r.data[user.Login]; exists {
-		return errors.New("user already exists")
+		return nil, errors.New("user already exists")
 	}
 	r.data[user.Login] = user
-	return nil
+	return user, nil // Return user and error
 }
 
 // Get retrieves a user by login

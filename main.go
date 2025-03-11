@@ -18,8 +18,8 @@ func main() {
 	addr := flag.String("addr", ":8080", "HTTP server address")
 	flag.Parse()
 
-	userRepo := repository.NewUser()
-	userService := service.NewUserService(*userRepo)
+	userRepo := repository.NewUserRepository()
+	userService := service.NewUserService(userRepo)
 	userHandler := pkgHttp.NewUserHandler(userService)
 
 	r := chi.NewRouter()

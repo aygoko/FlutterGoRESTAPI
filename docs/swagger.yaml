@@ -1,0 +1,87 @@
+definitions:
+  repository.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      login:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/users:
+    get:
+      description: Retrieve a list of all registered users
+      responses:
+        "200":
+          description: List of users
+          schema:
+            items:
+              $ref: '#/definitions/repository.User'
+            type: array
+      summary: Get all users
+      tags:
+      - Users
+    post:
+      description: Create a user with login, email, and password
+      parameters:
+      - description: User details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/repository.User'
+      responses:
+        "201":
+          description: Created user
+          schema:
+            $ref: '#/definitions/repository.User'
+        "400":
+          description: Invalid request or duplicate user
+          schema:
+            type: string
+      summary: Create a new user
+      tags:
+      - Users
+  /api/users/{login}:
+    delete:
+      description: Delete a user by their login
+      parameters:
+      - description: User login to delete
+        in: path
+        name: login
+        required: true
+        type: string
+      responses:
+        "204":
+          description: User deleted successfully
+        "404":
+          description: User not found
+          schema:
+            type: string
+      summary: Delete user by login
+      tags:
+      - Users
+    get:
+      description: Retrieve a user by their login
+      parameters:
+      - description: User login
+        in: path
+        name: login
+        required: true
+        type: string
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: '#/definitions/repository.User'
+        "404":
+          description: User not found
+          schema:
+            type: string
+      summary: Get user by login
+      tags:
+      - Users
+swagger: "2.0"

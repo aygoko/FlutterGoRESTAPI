@@ -1,7 +1,7 @@
 package service
 
 import (
-	repository "github.com/aygoko/FlutterGoRESTAPI/repository/ram_storage"
+	repository "github.com/aygoko/FlutterGoRESTAPI/domain"
 )
 
 // UserService holds the repository instance
@@ -17,7 +17,8 @@ func NewUserService(repo repository.UserService) *UserService {
 }
 
 // Save delegates to repository
-func (s *UserService) Save(user *repository.User) error {
+// usecases/service/user.go
+func (s *UserService) Save(user *repository.User) (*repository.User, error) {
 	return s.Repo.Save(user)
 }
 

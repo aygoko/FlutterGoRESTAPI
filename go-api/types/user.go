@@ -8,17 +8,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// UserService should be in the service package, so adjust receiver types
-// @Summary Create a new user
-// @Description Creates a user with login, email, and hashed password
-// @Tags Users
-// @Param login formData string true "User login"
-// @Param email formData string true "User email"
-// @Param password formData string true "User password (plaintext)"
-// @Success 201 {object} types.User
-// @Failure 400 {string} error "Invalid request or duplicate user"
-// @Router /api/users [post]
-func (s *repository.UserService) CreateUser(login, email, password string) (*repository.User, error) { // Use types.User here
+func (s *repository.UserService) CreateUser(login, email, password string) (*repository.User, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -28,7 +18,6 @@ func (s *repository.UserService) CreateUser(login, email, password string) (*rep
 		return nil, errors.New("login and email are required")
 	}
 
-	// Use exported fields from service.UserService (uppercase)
 	if _, exists := s.Users[login]; exists {
 		return nil, errors.New("user with this login already exists")
 	}
@@ -37,7 +26,7 @@ func (s *repository.UserService) CreateUser(login, email, password string) (*rep
 		return nil, errors.New("email already in use by " + existingLogin)
 	}
 
-	user := &repository.User{ // Create instance of types.User
+	user := &repository.User{
 		ID:       service.GenerateUserID(),
 		Login:    login,
 		Email:    email,
@@ -50,30 +39,16 @@ func (s *repository.UserService) CreateUser(login, email, password string) (*rep
 	return user, nil
 }
 
-// @Summary Get a user by login
-// @Description Retrieves a user by their login
-// @Tags Users
-// @Param login path string true "User login"
-// @Success 200 {object} types.User
-// @Failure 404 {string} error "User not found"
-// @Router /api/users/{login} [get]
-func (s *repository.UserService) GetUserByLogin(login string) (*repository.User, error) { // Return types.User
-	user, exists := s.Users[login] // Access exported Users map
+func (s *repository.UserService) GetUserByLogin(login string) (*repository.User, error) {
+	user, exists := s.Users[login]
 	if !exists {
 		return nil, errors.New("user not found")
 	}
-	return user, nil // Directly return the pointer
+	return user, nil
 }
 
-// @Summary Get a user by email
-// @Description Retrieves a user by their email
-// @Tags Users
-// @Param email path string true "User email" // Changed to path
-// @Success 200 {object} types.User
-// @Failure 404 {string} error "User not found"
-// @Router /api/users/email/{email} [get]
 func (s *repository.UserService) GetUserByEmail(email string) (*repository.User, error) {
-	login, exists := s.Emails[email] // Use exported Emails map
+	login, exists := s.Emails[email]
 	if !exists {
 		return nil, errors.New("user not found")
 	}
@@ -84,11 +59,6 @@ func (s *repository.UserService) GetUserByEmail(email string) (*repository.User,
 	return user, nil
 }
 
-// @Summary List all users
-// @Description Returns a list of all registered users
-// @Tags Users
-// @Success 200 {array} types.User
-// @Router /api/users [get]
 func (s *repository.UserService) GetAllUsers() []*repository.User {
 	users := make([]*repository.User, 0, len(s.Users))
 	for _, user := range s.Users {
@@ -97,13 +67,6 @@ func (s *repository.UserService) GetAllUsers() []*repository.User {
 	return users
 }
 
-// @Summary Delete a user by login
-// @Description Removes a user by their login
-// @Tags Users
-// @Param login path string true "User login to delete"
-// @Success 204 "User deleted successfully"
-// @Failure 404 {string} error "User not found"
-// @Router /api/users/{login} [delete]
 func (s *repository.UserService) DeleteUser(login string) error {
 	user, exists := s.Users[login]
 	if !exists {
