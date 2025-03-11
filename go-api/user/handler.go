@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/aygoko/FlutterGoRESTAPI/usecases/service"
+
 	"github.com/go-chi/chi/v5"
-	"github.com/yourproject/service"
 )
 
 type UserHandler struct {
