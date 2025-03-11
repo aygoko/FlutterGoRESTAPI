@@ -31,6 +31,15 @@ func NewUserService(repo repository.User) *UserService {
 	}
 }
 
+// @Summary Create a new user
+// @Description Creates a user with login, email, and hashed password
+// @Tags Users
+// @Param login query string true "User login"
+// @Param email query string true "User email"
+// @Param password query string true "User password (plaintext)"
+// @Success 201 {object} User
+// @Failure 400 {string} error "Invalid request or duplicate user"
+// @Router /api/users [post]
 func (s *UserService) CreateUser(login, email, password string) (*User, error) {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -63,6 +72,13 @@ func (s *UserService) CreateUser(login, email, password string) (*User, error) {
 	return user, nil
 }
 
+// @Summary Get a user by login
+// @Description Retrieves a user by their login
+// @Tags Users
+// @Param login path string true "User login"
+// @Success 200 {object} User
+// @Failure 404 {string} error "User not found"
+// @Router /api/users/{login} [get]
 func (s *UserService) GetUserByLogin(login string) (*User, error) {
 	user, exists := s.users[login]
 	if !exists {
@@ -71,6 +87,13 @@ func (s *UserService) GetUserByLogin(login string) (*User, error) {
 	return user, nil
 }
 
+// @Summary Get a user by email
+// @Description Retrieves a user by their email
+// @Tags Users
+// @Param email query string true "User email"
+// @Success 200 {object} User
+// @Failure 404 {string} error "User not found"
+// @Router /api/users/email/{email} [get]
 func (s *UserService) GetUserByEmail(email string) (*User, error) {
 	login, exists := s.emails[email]
 	if !exists {
@@ -79,6 +102,11 @@ func (s *UserService) GetUserByEmail(email string) (*User, error) {
 	return s.users[login], nil
 }
 
+// @Summary List all users
+// @Description Returns a list of all registered users
+// @Tags Users
+// @Success 200 {array} User
+// @Router /api/users [get]
 func (s *UserService) GetAllUsers() []*User {
 	var users []*User
 	for _, user := range s.users {
@@ -87,6 +115,13 @@ func (s *UserService) GetAllUsers() []*User {
 	return users
 }
 
+// @Summary Delete a user by login
+// @Description Removes a user by their login
+// @Tags Users
+// @Param login patstring true "User login to delete"
+// @Success 204 "User deleted successfully"
+// @Failure 404 {string} error "User not found"
+// @Router /api/users/{login} [delete]
 func (s *UserService) DeleteUser(login string) error {
 	user, exists := s.users[login]
 	if !exists {
