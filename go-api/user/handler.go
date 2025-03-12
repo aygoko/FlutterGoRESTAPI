@@ -15,7 +15,7 @@ type UserHandler struct {
 }
 
 // NewUserHandler creates a new user handler instance
-func NewUserHandler(s service.UserService) *UserHandler {
+func NewUserHandler(s *service.UserService) *UserHandler {
 	return &UserHandler{
 		Service: s, // Direct assignment if service implements the interface
 	}

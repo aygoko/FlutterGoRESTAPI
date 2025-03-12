@@ -1,0 +1,15 @@
+services:
+  go-api:
+    build:
+      context: .  # Project root directory
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"  # Host:Container
+    environment:
+      - APP_ENV=development
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
